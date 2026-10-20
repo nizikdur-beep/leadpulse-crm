@@ -51,6 +51,8 @@ if (file_exists($composerAutoload)) {
 }
 
 // 3. Application Configuration & Error Handling
+require_once __DIR__ . '/../app/Core/helpers.php';
+
 $appConfig = require __DIR__ . '/../config/app.php';
 date_default_timezone_set($appConfig['timezone'] ?? 'Asia/Tashkent');
 

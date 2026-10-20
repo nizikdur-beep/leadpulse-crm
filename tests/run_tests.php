@@ -19,6 +19,7 @@ spl_autoload_register(function ($class) use ($baseDir) {
     if (file_exists($file)) require_once $file;
 });
 
+require_once $baseDir . '/app/Core/helpers.php';
 require_once $baseDir . '/routes/web.php';
 
 use App\Core\Auth;
