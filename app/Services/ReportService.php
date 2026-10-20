@@ -115,14 +115,17 @@ class ReportService
             $params['uid'] = $userId;
         }
 
+        $isSqlite = Database::getDriver() === 'sqlite';
+        $monthExpr = $isSqlite ? "strftime('%Y-%m', created_at)" : "DATE_FORMAT(created_at, '%Y-%m')";
+
         $sql = "
             SELECT 
-                DATE_FORMAT(created_at, '%Y-%m') AS month_key,
+                {$monthExpr} AS month_key,
                 COUNT(*) AS count,
                 COALESCE(SUM(amount), 0) AS total_amount
             FROM leads
             {$where}
-            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            GROUP BY {$monthExpr}
             ORDER BY month_key DESC
             LIMIT {$months}
         ";

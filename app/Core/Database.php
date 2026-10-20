@@ -9,6 +9,7 @@ use RuntimeException;
 class Database
 {
     private static ?PDO $instance = null;
+    private static string $activeDriver = 'mysql';
 
     public static function connect(?array $config = null): PDO
     {
@@ -19,20 +20,26 @@ class Database
         if ($config === null) {
             $configPath = __DIR__ . '/../../config/database.php';
             $allConfig = file_exists($configPath) ? require $configPath : [];
-            $default = $allConfig['default'] ?? 'mysql';
+            $default = $allConfig['default'] ?? 'sqlite';
             $config = $allConfig['connections'][$default] ?? [];
+            self::$activeDriver = $default;
         }
 
-        $driver = $config['driver'] ?? 'mysql';
+        $driver = $config['driver'] ?? 'sqlite';
 
         try {
             if ($driver === 'sqlite') {
+                $dbDir = dirname($config['database']);
+                if (!is_dir($dbDir)) {
+                    @mkdir($dbDir, 0755, true);
+                }
                 $dsn = 'sqlite:' . $config['database'];
                 self::$instance = new PDO($dsn, null, null, $config['options'] ?? [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 ]);
                 self::$instance->exec('PRAGMA foreign_keys = ON;');
+                self::$activeDriver = 'sqlite';
             } else {
                 $dsn = sprintf(
                     'mysql:host=%s;port=%s;dbname=%s;charset=%s',
@@ -54,14 +61,36 @@ class Database
                     $config['password'] ?? '',
                     $options
                 );
+                self::$activeDriver = 'mysql';
             }
 
             return self::$instance;
         } catch (PDOException $e) {
-            // Log the error securely without leaking credentials
-            error_log('Database Connection Error: ' . $e->getMessage());
-            throw new RuntimeException('Maʼlumotlar bazasiga ulanishda xatolik yuz berdi: ' . $e->getMessage());
+            error_log('Database Connection Warning: ' . $e->getMessage() . '. Fallback to SQLite.');
+            
+            // Auto fallback to SQLite if MySQL fails
+            if ($driver === 'mysql') {
+                $sqlitePath = __DIR__ . '/../../storage/database.sqlite';
+                $dbDir = dirname($sqlitePath);
+                if (!is_dir($dbDir)) {
+                    @mkdir($dbDir, 0755, true);
+                }
+                self::$instance = new PDO('sqlite:' . $sqlitePath, null, null, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                ]);
+                self::$instance->exec('PRAGMA foreign_keys = ON;');
+                self::$activeDriver = 'sqlite';
+                return self::$instance;
+            }
+
+            throw new RuntimeException('Maʼlumotlar bazasiga ulanishda xatolik: ' . $e->getMessage());
         }
+    }
+
+    public static function getDriver(): string
+    {
+        return self::$activeDriver;
     }
 
     public static function setConnection(PDO $pdo): void

@@ -23,7 +23,7 @@ try {
         $adminPassword = password_hash('Admin@12345', PASSWORD_DEFAULT);
         $insertAdmin = $db->prepare("
             INSERT INTO users (name, email, password, role, is_active, created_at, updated_at)
-            VALUES (:name, :email, :password, 'admin', 1, NOW(), NOW())
+            VALUES (:name, :email, :password, 'admin', 1, datetime('now'), datetime('now'))
         ");
         $insertAdmin->execute([
             'name' => 'Bosh Administrator',
@@ -60,7 +60,7 @@ try {
         if (!$existing) {
             $ins = $db->prepare("
                 INSERT INTO users (name, email, password, role, is_active, created_at, updated_at)
-                VALUES (:name, :email, :password, :role, 1, NOW(), NOW())
+                VALUES (:name, :email, :password, :role, 1, datetime('now'), datetime('now'))
             ");
             $ins->execute($mgr);
             $mgrId = (int)$db->lastInsertId();
@@ -133,7 +133,7 @@ try {
     $clientStmt = $db->prepare("SELECT id FROM clients WHERE email = :email AND deleted_at IS NULL LIMIT 1");
     $insertClient = $db->prepare("
         INSERT INTO clients (name, phone, email, company, address, notes, created_by, assigned_to, created_at, updated_at)
-        VALUES (:name, :phone, :email, :company, :address, :notes, :created_by, :assigned_to, NOW(), NOW())
+        VALUES (:name, :phone, :email, :company, :address, :notes, :created_by, :assigned_to, datetime('now'), datetime('now'))
     ");
 
     foreach ($sampleClients as $c) {
@@ -211,7 +211,7 @@ try {
     $leadCheck = $db->prepare("SELECT id FROM leads WHERE title = :title AND deleted_at IS NULL LIMIT 1");
     $insertLead = $db->prepare("
         INSERT INTO leads (client_id, user_id, title, amount, stage, source, notes, next_contact_at, lost_reason, created_at, updated_at)
-        VALUES (:client_id, :user_id, :title, :amount, :stage, :source, :notes, :next_contact_at, :lost_reason, NOW(), NOW())
+        VALUES (:client_id, :user_id, :title, :amount, :stage, :source, :notes, :next_contact_at, :lost_reason, datetime('now'), datetime('now'))
     ");
 
     foreach ($sampleLeads as $l) {
@@ -223,7 +223,7 @@ try {
             $leadIds[] = $lid;
 
             // Insert initial history
-            $hist = $db->prepare("INSERT INTO lead_stage_history (lead_id, user_id, old_stage, new_stage, created_at) VALUES (?, ?, ?, ?, NOW())");
+            $hist = $db->prepare("INSERT INTO lead_stage_history (lead_id, user_id, old_stage, new_stage, created_at) VALUES (?, ?, ?, ?, datetime('now'))");
             $hist->execute([$lid, $l['user_id'], 'new', $l['stage']]);
         } else {
             $leadIds[] = (int)$existing['id'];
@@ -277,7 +277,7 @@ try {
 
     $insertTask = $db->prepare("
         INSERT INTO tasks (lead_id, client_id, user_id, title, description, due_date, priority, status, created_at, updated_at)
-        VALUES (:lead_id, :client_id, :user_id, :title, :description, :due_date, :priority, :status, NOW(), NOW())
+        VALUES (:lead_id, :client_id, :user_id, :title, :description, :due_date, :priority, :status, datetime('now'), datetime('now'))
     ");
     $taskCheck = $db->prepare("SELECT id FROM tasks WHERE title = :title LIMIT 1");
 
@@ -316,7 +316,7 @@ try {
 
     $insertAct = $db->prepare("
         INSERT INTO activities (lead_id, client_id, user_id, type, note, created_at)
-        VALUES (:lead_id, :client_id, :user_id, :type, :note, NOW())
+        VALUES (:lead_id, :client_id, :user_id, :type, :note, datetime('now'))
     ");
     $actCount = (int)$db->query("SELECT COUNT(*) FROM activities")->fetchColumn();
     if ($actCount === 0) {
@@ -331,3 +331,4 @@ try {
     echo "[XATO] Seeder xatoligi: " . $e->getMessage() . "\n";
     exit(1);
 }
+

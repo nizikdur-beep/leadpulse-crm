@@ -127,8 +127,11 @@ abstract class Model
     public function delete(int $id, bool $force = false): bool
     {
         $db = self::db();
+        $isSqlite = Database::getDriver() === 'sqlite';
+        $nowExpr = $isSqlite ? "datetime('now')" : "NOW()";
+
         if ($this->useSoftDelete && !$force) {
-            $stmt = $db->prepare("UPDATE {$this->getTable()} SET deleted_at = NOW() WHERE {$this->primaryKey} = :id");
+            $stmt = $db->prepare("UPDATE {$this->getTable()} SET deleted_at = {$nowExpr} WHERE {$this->primaryKey} = :id");
             return $stmt->execute(['id' => $id]);
         }
 

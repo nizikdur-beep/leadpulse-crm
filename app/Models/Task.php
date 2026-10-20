@@ -77,6 +77,9 @@ class Task extends Model
 
         $offset = ($page - 1) * $perPage;
 
+        $isSqlite = \App\Core\Database::getDriver() === 'sqlite';
+        $curDateExpr = $isSqlite ? "date('now')" : "CURDATE()";
+
         $sql = "
             SELECT 
                 t.*, 
@@ -84,7 +87,7 @@ class Task extends Model
                 c.name AS client_name,
                 l.title AS lead_title,
                 CASE 
-                    WHEN t.status != 'done' AND t.due_date < CURDATE() THEN 1 
+                    WHEN t.status != 'done' AND t.due_date < {$curDateExpr} THEN 1 
                     ELSE 0 
                 END AS is_overdue
             FROM {$this->getTable()} t
@@ -130,6 +133,9 @@ class Task extends Model
 
         $whereSql = implode(' AND ', $conditions);
 
+        $isSqlite = \App\Core\Database::getDriver() === 'sqlite';
+        $curDateExpr = $isSqlite ? "date('now')" : "CURDATE()";
+
         $sql = "
             SELECT 
                 t.*, 
@@ -137,7 +143,7 @@ class Task extends Model
                 c.name AS client_name,
                 l.title AS lead_title,
                 CASE 
-                    WHEN t.due_date < CURDATE() THEN 1 
+                    WHEN t.due_date < {$curDateExpr} THEN 1 
                     ELSE 0 
                 END AS is_overdue
             FROM {$this->getTable()} t
