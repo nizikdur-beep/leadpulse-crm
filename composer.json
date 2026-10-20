@@ -1,0 +1,19 @@
+{
+    "name": "leadpulse/crm",
+    "description": "LeadPulse Mini Framework - Professional PHP MVC CRM",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "LeadPulse Team"
+        }
+    ],
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
+
+# Prevent viewing files from root
+<FilesMatch "^\.env">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
