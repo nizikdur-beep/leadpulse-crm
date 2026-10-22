@@ -17,6 +17,14 @@ Router::get('/', function() {
     return Response::redirect('/dashboard');
 });
 
+// Health check endpoint
+Router::get('/api/health', function() {
+    return Response::json(['status' => 'ok', 'app' => 'LeadPulse CRM', 'time' => date('Y-m-d H:i:s')]);
+});
+Router::get('/health', function() {
+    return Response::json(['status' => 'ok', 'app' => 'LeadPulse CRM', 'time' => date('Y-m-d H:i:s')]);
+});
+
 // Authentication Routes
 Router::get('/login', [AuthController::class, 'showLogin'], ['guest']);
 Router::post('/login', [AuthController::class, 'login'], ['guest']);
