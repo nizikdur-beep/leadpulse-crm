@@ -24,6 +24,12 @@ Router::get('/api/health', function() {
 Router::get('/health', function() {
     return Response::json(['status' => 'ok', 'app' => 'LeadPulse CRM', 'time' => date('Y-m-d H:i:s')]);
 });
+Router::get('/api/workers', function() {
+    return Response::json([]);
+});
+Router::get('/js/api.js', function() {
+    return Response::make('/* api */', 200, ['Content-Type' => 'application/javascript']);
+});
 
 // Authentication Routes
 Router::get('/login', [AuthController::class, 'showLogin'], ['guest']);
